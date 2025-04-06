@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Report - StockManager</title>
+    <style>
+        :root {
+            /* Enhanced color palette */
+            --teal-50: #f0fdfa;
+            --teal-100: #ccfbf1;
+            --teal-500: #14b8a6;
+            --teal-600: #0d9488;
+            --teal-700: #0f766e;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Enhanced shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav-header {
+            background-color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            color: var(--teal-600);
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        /* Update button-group styles */
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-left: auto;
+        }
+
+        /* Enhanced button styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 2.75rem;
+            min-width: 120px;
+        }
+
+        .btn i {
+            font-size: 0.875rem;
+            transition: transform 0.2s ease;
+        }
+
+        /* Primary button enhancement */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, #0F766E, #0D9488);
+            color: white;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0D9488, #0F766E);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary i,
+        .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary i {
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-primary:hover i {
+            transform: translateY(-1px);
+        }
+
+        /* Secondary button enhancement */
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 1.5px solid var(--gray-300);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .main-content {
+            padding: 2rem 1.5rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+            gap: 0.75rem;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            background: white;
+            transition: all 0.15s ease;
+        }
+
+        .filter-input:hover {
+            border-color: var(--gray-300);
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--teal-500);
+            box-shadow: 0 0 0 4px var(--teal-100);
+        }
+
+        /* Add specific styles for select inputs */
+        select.filter-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: none;
+            padding-right: 2.5rem; /* Increased right padding to prevent overlap */
+        }
+
+        /* Style for the icon container */
+        .relative {
+            position: relative;
+        }
+
+        .relative i.fa-chevron-down {
+            font-size: 0.875rem;
+            color: var(--teal-500);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th {
+            background: var(--gray-50);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: var (--gray-700);
+            border-bottom: 1px solid var (--gray-200);
+            transition: background-color 0.15s ease;
+        }
+
+        tr:hover td {
+            background-color: var(--gray-50);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .status-in {
+            background-color: var(--teal-50);
+            color: var(--teal-700);
+        }
+
+        .status-out {
+            background-color: #fff7ed;
+            color: #c2410c;
+        }
+
+        .status-scrap {
+            background-color: var (--gray-200);
+            color: var (--gray-800);
+            border: 1px solid var(--gray-300);
+        }
+
+        .status-scrap:hover {
+            background-color: var(--gray-300);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        /* Filter button container enhancement */
+        .filter-button-container {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+        }
+
+        .filter-button-container .btn {
+            width: 100%;
+            padding: 0.625rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .filter-button-container .btn i {
+            margin-right: 0.5rem;
+        }
+
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .content {
+            flex: 1;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem; /* Increased padding */
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4B5563;
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            color: #0F766E;
+        }
+        .nav-link.active {
+            color: #0F766E;
+            font-weight: 600;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #0F766E;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .hero-gradient {
+            background: linear-gradient(
+                rgba(15, 118, 110, 0.95), 
+                rgba(17, 24, 39, 0.95)
+            );
+        }
+        .login-btn {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #0F766E;
+        border: 1.5px solid #0F766E;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+    }
+    .login-btn:hover {
+        background-color: #0F766E;
+        color: white;
+    }
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #CBD5E0 #EDF2F7;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #EDF2F7;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #CBD5E0;
+        border-radius: 3px;
+    }
+    /* Add smooth scroll behavior */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Enhance notification button */
+    #notification-btn {
+        transition: transform 0.2s ease;
+        padding: 0.75rem;  /* Increased from 0.375rem */
+        margin: 0 0.5rem;
+        height: 2.75rem;
+        width: 2.75rem;
+    }
+
+    #notification-btn:hover {
+        transform: scale(1.1);
+        background-color: #F3F4F6;
+    }
+
+    #notification-btn i {
+        font-size: 1rem;
+    }
+
+    /* Add hover effect to feature cards */
+    .bg-white.p-10 {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .bg-white.p-10:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+                    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Remove animation and update notification styles */
+    #notification-count {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background-color: #EF4444;
+        color: white;
+        font-size: 0.625rem;  /* Reduced from 0.675rem */
+        height: 14px;  /* Reduced from 16px */
+        width: 14px;   /* Reduced from 16px */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        font-weight: 600;
+        border: 2px solid white;
+        animation: pulse 2s infinite;
+    }
+
+    /* Enhanced Navigation Styles */
+    header.bg-white {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .max-w-7xl {
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0.75rem 1.5rem;
+    }
+
+    /* Logo section adjustments */
+    .flex.items-center.space-x-3 {
+        margin-left: 1.5rem;
+        gap: 0.75rem; /* Increased gap */
+    }
+
+    .w-10.h-10 {
+        width: 2.5rem;   /* Increased from 2rem */
+        height: 2.5rem;  /* Increased from 2rem */
+    }
+
+    h1.text-2xl {
+        font-size: 1.125rem;  /* Reduced from 1.25rem */
+        letter-spacing: -0.01em;
+    }
+
+    /* Navigation links adjustments */
+    .nav-link i {
+        font-size: 0.8125rem;  /* Reduced from 0.875rem */
+        margin-right: 0.375rem;
+    }
+
+    /* Spacing between nav items */
+    .space-x-8 > * + * {
+        margin-left: 2rem; /* Increased from 1.5rem */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .flex.items-center.space-x-3 {
+            margin-left: 1rem;
+        }
+
+        .space-x-8 > * + * {
+            margin-left: 1.5rem;
+        }
+    }
+
+    .nav-icon-btn {
+        position: relative;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        color: #4B5563;
+        transition: all 0.2s ease;
+    }
+
+    .nav-icon-btn:hover {
+        background-color: #F3F4F6;
+        color: #0F766E;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        min-width: 1.25rem;
+        height: 1.25rem;
+        padding: 0 0.25rem;
+        background-color: #EF4444;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        border: 2px solid white;
+    }
+
+    .nav-btn-primary {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem; /* Increased padding */
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: white;
+        background-color: #0F766E;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        margin-left: 1rem;
+    }
+
+    .nav-btn-primary:hover {
+        background-color: #0E6760;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                   0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Add responsive styles */
+    @media (max-width: 768px) {
+        .nav-link span,
+        .nav-btn-primary span {
+            display: none;
+        }
+
+        .nav-link,
+        .nav-btn-primary {
+            padding: 0.875rem;  /* Increased from 0.75rem */
+        }
+
+        .nav-link i,
+        .nav-btn-primary i {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+    }
+
+    /* Add animation for notification count */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1280px) {
+        .max-w-7xl {
+            padding: 0 2rem;
+        }
+        
+        .space-x-8 > * + * {
+            margin-left: 1.5rem;
+        }
+    }
+
+    /* Adjust container padding */
+    .max-w-7xl .px-6 {
+        padding-top: 0.75rem;    /* Added vertical padding */
+        padding-bottom: 0.75rem; /* Added vertical padding */
+    }
+
+    /* Login Button Enhancement */
+    .nav-btn-primary,
+    a[href="login.html"] {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.875rem 1.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #0F766E;
+        background-color: transparent;
+        border: 1.5px solid #0F766E;
+        border-radius: 0.5rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-btn-primary:hover,
+    a[href="login.html"]:hover {
+        color: white;
+        background-color: #0F766E;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
+    }
+
+    .nav-btn-primary i,
+    a[href="login.html"] i {
+        font-size: 0.875rem;
+        transition: transform 0.2s ease;
+    }
+
+    .nav-btn-primary:hover i,
+    a[href="login.html"]:hover i {
+        transform: translateX(2px);
+    }
+
+    /* Responsive adjustments for login button */
+    @media (max-width: 768px) {
+        .nav-btn-primary,
+        a[href="login.html"] {
+            padding: 0.75rem 1rem;
+        }
+        
+        .nav-btn-primary span,
+        a[href="login.html"] span {
+            display: none;
+        }
+        
+        .nav-btn-primary i,
+        a[href="login.html"] i {
+            margin: 0;
+            font-size: 1rem;
+        }
+    }
+
+    /* Notification Button Enhancement */
+    #notification-btn {
+        position: relative;
+        padding: 0.625rem;
+        background-color: #F3F4F6;
+        border-radius: 0.75rem;
+        color: #4B5563;
+        transition: all 0.2s ease;
+        border: 1px solid #E5E7EB;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    #notification-btn:hover {
+        background-color: #E5E7EB;
+        color: #0F766E;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    #notification-btn i {
+        font-size: 1rem;
+    }
+
+    /* Update notification badge */
+    #notification-count {
+        position: absolute;
+        top: -0.375rem;
+        right: -0.375rem;
+        min-width: 1.125rem;
+        height: 1.125rem;
+        background-color: #EF4444;
+        color: white;
+        font-size: 0.625rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        padding: 0 0.25rem;
+    }
+
+    /* Remove existing pulse animation */
+    #notification-count {
+        animation: none;
+    }
+    
+    /* Updated Header and Navigation Styles */
+    header.bg-white {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .max-w-7xl {
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .flex.items-center.justify-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+
+    /* Logo section adjustments */
+    .flex.items-center.space-x-3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    /* Navigation Links Container */
+    nav.flex.items-center.space-x-8 {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-grow: 1;
+        justify-content: flex-end;
+    }
+
+    /* Navigation Link Items */
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    /* Notification and Login Button Container */
+    .nav-buttons {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-left: auto;
+    }
+
+    @media (max-width: 768px) {
+        .max-w-7xl {
+            padding: 0.5rem 1rem;
+        }
+
+        nav.flex.items-center.space-x-8 {
+            gap: 1rem;
+        }
+
+        .nav-link span {
+            display: none;
+        }
+    }
+    
+    /* Tooltip styles */
+    .tooltip {
+        position: relative;
+    }
+
+    .tooltip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.5rem;
+        background-color: var(--gray-800);
+        color: white;
+        font-size: 0.75rem;
+        border-radius: 0.375rem;
+        white-space: pre-wrap;
+        max-width: 200px;
+        z-index: 20;
+        margin-bottom: 0.5rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .tooltip:hover::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0.5rem;
+        border-style: solid;
+        border-color: var(--gray-800) transparent transparent transparent;
+        z-index: 20;
+    }
+
+    /* Enhanced status badge for scrap */
+    .status-badge.status-scrap {
+        transition: all 0.2s ease;
+    }
+
+    .status-badge.status-scrap:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Tooltip styles */
+    .tooltip {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .tooltip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 130%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.5rem 1rem;
+        background-color: #1F2937;
+        color: white;
+        font-size: 0.75rem;
+        border-radius: 0.375rem;
+        white-space: pre-wrap;
+        max-width: 200px;
+        z-index: 50;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .tooltip::before {
+        content: '';
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #1F2937;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+    }
+
+    .tooltip:hover::after,
+    .tooltip:hover::before {
+        opacity: 1;
+        visibility: visible;
+    }
+    /* Table container styles */
+    .table-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        margin: 0 1.5rem;
+        width: calc(100% - 3rem); /* Full width minus margins */
+    }
+
+    .overflow-x-auto {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Table styles */
+    table {
+        width: 100%;
+        min-width: 800px; /* Minimum width to prevent squishing */
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    /* Column widths */
+    th:nth-child(1), td:nth-child(1) { width: 15%; } /* Part No */
+    th:nth-child(2), td:nth-child(2) { width: 25%; } /* Description */
+    th:nth-child(3), td:nth-child(3) { width: 15%; } /* Date */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Quantity */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Unit */
+    th:nth-child(6), td:nth-child(6) { width: 20%; } /* Status */
+
+    /* Main content container */
+    .main-content {
+        width: 100%;
+        max-width: 1440px; /* Increased max-width */
+        margin: 0 auto;
+        padding: 2rem 0; /* Remove horizontal padding */
+    }
+
+    /* Adjust filters section to match */
+    .filters-section {
+        margin: 0 1.5rem 2rem;
+        width: calc(100% - 3rem);
+    }
+
+    /* Update search icon color to match dropdown icon */
+    .filter-group .fa-search {
+        color: var(--teal-500); /* Same color as dropdown chevron */
+        font-size: 0.875rem; /* Match size with dropdown icon */
+        transition: color 0.2s ease;
+    }
+
+    /* Optional: Add hover state to match dropdown behavior */
+    .filter-input:hover + div .fa-search,
+    .filter-input:focus + div .fa-search {
+        color: var(--teal-600);
+    }
+
+    /* Navigation styles */
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        color: #4B5563;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-radius: 0.375rem;
+    }
+
+    .nav-link:hover {
+        color: #0F766E;
+        background-color: #F3F4F6;
+    }
+
+    .nav-link.active {
+        color: #0F766E;
+        background-color: #F0FDFA;
+        font-weight: 600;
+    }
+
+    /* Mobile navigation styles */
+    .mobile-nav-link {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #4B5563;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-radius: 0.375rem;
+    }
+
+    .mobile-nav-link:hover {
+        color: #0F766E;
+        background-color: #F3F4F6;
+    }
+
+    .mobile-nav-link.active {
+        color: #0F766E;
+        background-color: #F0FDFA;
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .nav-link span {
+            display: none;
+        }
+        
+        .nav-link {
+            padding: 0.5rem;
+        }
+    }
+
+    /* Add to your existing styles */
+    .nav-btn-primary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #0F766E;
+        color: white;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .nav-btn-primary:hover {
+        background-color: #0D6D64;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 640px) {
+        .nav-btn-primary span {
+            display: none;
+        }
+        
+        .nav-btn-primary {
+            padding: 0.5rem;
+        }
+    }
+
+    /* Remove margin bottom from container */
+    .flex.justify-between.items-center.mb-4 {
+        margin-bottom: 0;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 640px) {
+        .btn-primary {
+            padding: 0.625rem;
+            min-width: 2.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary span {
+            display: none;
+        }
+
+        .btn-primary i {
+            margin: 0;
+        }
+    }
+</style>
+
+    <!-- Add these new links after your existing styles -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add SheetJS library -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+</head>
+<body>
+
+    
+    <!-- Navigation Bar with Enhanced Gradient -->
+    <!-- Replace the old navigation with this new one -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between h-16 px-4 sm:px-6">
+            <!-- Logo section -->
+            <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <h1 class="text-xl font-semibold text-gray-800">REPORT</h1>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden sm:flex items-center space-x-6">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="stocks.html" class="nav-link">
+                    <i class="fas fa-boxes"></i>
+                    <span>Stock</span>
+                </a>
+                <a href="report.html" class="nav-link active">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+               
+                    <div class="flex justify-between items-center mb-4">
+                        <button id="exportBtn" class="btn-primary flex items-center gap-2">
+                            <i class="fas fa-download"></i>
+                            <span>Export Report</span>
+                        </button>
+                    </div>
+                    
+            </nav>
+
+            
+
+            <!-- Mobile menu button -->
+            <div class="sm:hidden">
+                <button type="button" class="mobile-menu-button p-2 text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="sm:hidden mobile-menu hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="mobile-nav-link">
+                    <i class="fas fa-home mr-2"></i>
+                    Home
+                </a>
+                <a href="stocks.html" class="mobile-nav-link">
+                    <i class="fas fa-boxes mr-2"></i>
+                    Stock
+                </a>
+                <a href="report.html" class="mobile-nav-link active">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    Reports
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Enhanced Filters -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <!-- Date Range Filter -->
+                <div class="filter-group">
+                    <label class="filter-label" for="dateFilter">Date Range</label>
+                    <div class="relative">
+                        <select id="dateFilter" class="filter-input">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="current">This month</option>
+                            <option value="custom">Custom range</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-teal-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Movement Type Filter -->
+                <div class="filter-group">
+                    <label class="filter-label" for="movementFilter">Movement Type</label>
+                    <div class="relative">
+                        <select id="movementFilter" class="filter-input appearance-none pr-10">
+                            <option value="all">All Movements</option>
+                            <option value="in">Stock In</option>
+                            <option value="out">Stock Out</option>
+                            <option value="scrap">Scrap</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-teal-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part Number Search -->
+                <div class="filter-group">
+                    <label class="filter-label" for="searchInput">Part Number</label>
+                    <div class="relative">
+                        <input type="text" 
+                               id="searchInput" 
+                               placeholder="Search part number..." 
+                               class="filter-input pl-10 pr-4">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Apply Button -->
+                <div class="filter-button-container">
+                    <button id="applyFilters" class="btn btn-primary">
+                        <i class="fas fa-filter"></i>
+                        <span>Apply Filters</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Part No.</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th class="text-center">Quantity</th>
+                            <th>Unit</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <!-- Dynamic content will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <!-- Add this before closing body tag -->
+    <script src="js/report.js"></script>
+    <script src="js/notifications.js"></script>
+    <script>
+        // Update the scrap data handling in loadReportData
+        if (item.scrapped) {
+            addTableRow(tbody, {
+                partNo: item.partNumber,
+                description: item.materialDesc,
+                quantity: -item.scrapped,
+                date: new Date().toLocaleDateString(),
+                movement: 'scrap',
+                unit: 'PC',
+                status: 'Scrapped',
+                reason: item.scrapReason || 'No reason provided'
+            });
+        }
+
+        // Add to your stock management functions
+        function updateStock(item, type, quantity) {
+            // Your existing stock update logic...
+
+            // Trigger notification
+            const event = new CustomEvent('stockUpdated', {
+                detail: { item, type, quantity }
+            });
+            document.dispatchEvent(event);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Copy all styles from index.html */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .content {
+            flex: 1;
+        }
+        /* ...copy all other styles from index.html... */
+
+        /* Update these button styles in the <style> tag */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;  /* Changed from flex-direction: column */
+            background: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            width: 160px;  /* Reduced width */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-icon {
+            width: 2rem;  /* Smaller icon */
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;  /* Changed from margin-bottom */
+            transition: transform 0.2s ease;
+        }
+
+        .btn-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .btn-subtitle {
+            font-size: 0.75rem;
+            color: #6B7280;
+        }
+
+        /* Button Variants */
+        .btn-inward .btn-icon {
+            background: linear-gradient(135deg, #34D399, #0D9488);
+            color: white;
+        }
+
+        .btn-withdraw .btn-icon {
+            background: linear-gradient(135deg, #FBBF24, #D97706);
+            color: white;
+        }
+
+        .btn-scrap .btn-icon {
+            background: linear-gradient(135deg, #F87171, #DC2626);
+            color: white;
+        }
+
+        .btn-inward .btn-title { color: #0D9488; }
+        .btn-withdraw .btn-title { color: #D97706; }
+        .btn-scrap .btn-title { color: #DC2626; }
+
+        /* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1rem;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    transform: translateY(-20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0) scale(1);
+}
+
+/* Ensure modals stack properly */
+#withdrawModal {
+    z-index: 1001;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1;
+}
+
+.close-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F3F4F6;
+    border: none;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+}
+
+.close-btn:hover {
+    background: #E5E7EB;
+    color: #1F2937;
+    transform: rotate(90deg);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #E5E7EB;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: #F9FAFB;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #0D9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    background: white;
+}
+
+.form-group input:hover {
+    border-color: #D1D5DB;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    transform: translateY(0);
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary:active, .btn-secondary:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #0D9488;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.btn-primary:hover {
+    background: #0F766E;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: #F3F4F6;
+    color: #374151;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: #E5E7EB;
+    border-color: #9CA3AF;
+}
+
+
+.btn-primary.success i {
+    animation: scale-check 0.5s ease forwards;
+}
+
+@keyframes button-loading-spinner {
+    from {
+        transform: rotate(0turn);
+    }
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes scale-check {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.25);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Add these styles in your <style> tag */
+.btn-primary.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-primary.loading i,
+.btn-primary.loading span {
+    opacity: 0;
+}
+
+.btn-primary.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: spin 0.8s linear infinite;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.btn-primary.success {
+    background-color: #059669;
+}
+
+.btn-primary.success i {
+    transform: scale(0);
+    animation: popIn 0.3s ease forwards;
+}
+
+@keyframes popIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+    .inline-edit-cell {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .edit-icon {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    tr:hover .edit-icon {
+        opacity: 1;
+    }
+
+    .stock-value {
+        font-weight: 500;
+    }
+
+    .stock-in-value { color: #059669; }
+    .stock-out-value { color: #D97706; }
+    .scrap-value { color: #DC2626; }
+
+    .inline-edit-form {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 0.375rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .inline-edit-input {
+        width: 80px;
+        text-align: center;
+        padding: 0.25rem;
+        border: 1px solid #D1D5DB;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    .inline-edit-buttons {
+        display: flex;
+        gap: 0.25rem;
+        margin-left: 0.5rem;
+    }
+
+    .inline-edit-buttons button {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .save-btn {
+        background: #059669;
+        color: white;
+    }
+
+    .cancel-btn {
+        background: #EF4444;
+        color: white;
+    }
+
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.25rem 0.5rem;
+        background: #1F2937;
+        color: white;
+        font-size: 0.75rem;
+        border-radius: 0.25rem;
+        white-space: nowrap;
+        z-index: 20;
+    }
+
+/* Add these styles to your existing <style> tag */
+.edit-button {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+tr:hover .edit-button {
+    opacity: 1;
+}
+
+/* Quick edit popup styles */
+.quick-edit-popup {
+    transition: all 0.3s ease;
+    transform: scale(0.95);
+}
+
+.quick-edit-popup.show {
+    transform: scale(1);
+}
+
+/* Replace the existing navigation styles in your <style> tag */
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    color: #4B5563;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: #0F766E;
+    background-color: #F3F4F6;
+}
+
+.nav-link.active {
+    color: #0F766E;
+    background-color: #F0FDFA;
+    font-weight: 600;
+}
+
+.nav-link i {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+}
+
+/* Remove the old spacing styles */
+nav.space-x-12 > * + * {
+    margin-left: 2rem;
+}
+
+/* Mobile styles */
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #4B5563;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 0.375rem;
+}
+
+.mobile-nav-link:hover {
+    color: #0F766E;
+    background-color: #F3F4F6;
+}
+
+.mobile-nav-link.active {
+    color: #0F766E;
+    background-color: #F0FDFA;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    nav .space-x-12 > * + * {
+        margin-left: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-link span {
+        display: none;
+    }
+    
+    .nav-link {
+        padding: 0.625rem;
+    }
+    
+    nav .space-x-12 > * + * {
+        margin-left: 1rem;
+    }
+}
+
+/* Add to your existing styles */
+.tab-btn {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    background-color: white;
+    color: #0F766E;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.form-input, .form-textarea {
+    transition: all 0.2s ease;
+}
+
+.form-input:hover, .form-textarea:hover {
+    border-color: #9CA3AF;
+}
+
+.form-input:focus, .form-textarea:focus {
+    border-color: transparent;
+    outline: none;
+}
+
+/* Custom scrollbar for textarea */
+textarea {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E0 #EDF2F7;
+}
+
+textarea::-webkit-scrollbar {
+    width: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+    background: #EDF2F7;
+}
+
+textarea::-webkit-scrollbar-thumb {
+    background-color: #CBD5E0;
+    border-radius: 3px;
+}
+        
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Bar -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center h-16 px-4 sm:px-6">
+            <!-- Logo section (Left) -->
+            <div class="flex items-center space-x-3 w-1/4">
+                <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <h1 class="text-xl font-semibold text-gray-800">STOCK</h1>
+            </div>
+
+            <!-- Empty space (Middle) -->
+            <div class="flex-1"></div>
+
+            <!-- Navigation Links (Right) -->
+            <nav class="hidden sm:flex items-center space-x-8 w-auto">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="stocks.html" class="nav-link active">
+                    <i class="fas fa-boxes"></i>
+                    <span>Stock</span>
+                </a>
+                <a href="report.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+            </nav>
+
+            <!-- Mobile menu button -->
+            <div class="sm:hidden ml-4">
+                <button type="button" class="mobile-menu-button p-2 text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu remains unchanged -->
+    </div>
+</header>
+
+    <!-- Hero Section with Action Buttons -->
+    <section class="bg-gradient-to-r from-teal-600 to-teal-700 py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="action-buttons">
+                <!-- Inward Button -->
+                <button id="inwardBtn" class="btn-action btn-inward">
+                    <div class="btn-icon">
+                        <i class="fas fa-arrow-down fa-lg"></i>
+                    </div>
+                    <span class="btn-title">Inward</span>
+                    
+                </button>
+
+                <!-- Withdraw Button -->
+                <button id="withdrawBtn" class="btn-action btn-withdraw">
+                    <div class="btn-icon">
+                        <i class="fas fa-arrow-up fa-lg"></i>
+                    </div>
+                    <span class="btn-title">Withdrawn</span>
+                    
+                </button>
+
+                <!-- Scrap Button -->
+                <button id="scrapBtn" class="btn-action btn-scrap">
+                    <div class="btn-icon">
+                        <i class="fas fa-trash-alt fa-lg"></i>
+                    </div>
+                    <span class="btn-title">Scrap</span>
+                    
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-8 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">S.No</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Part No</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Current Total</th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+                                    Stock In
+                                    <i class="fas fa-info-circle ml-1" title="Click edit icon to update stock in"></i>
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-amber-600 uppercase tracking-wider">
+                                    Stock Out
+                                    <i class="fas fa-info-circle ml-1" title="Click edit icon to update stock out"></i>
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-red-600 uppercase tracking-wider">
+                                    Scrap
+                                    <i class="fas fa-info-circle ml-1" title="Click edit icon to update scrap"></i>
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Table rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inward Modal -->
+    <div id="inwardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Stock</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="inwardForm" class="modal-form">
+                <div class="form-group">
+                    <label for="partNumber">Part Number</label>
+                    <input type="text" id="partNumber" name="partNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="materialDesc">Description</label>
+                    <input type="text" id="materialDesc" name="materialDesc" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" min="1" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Stock Withdrawal</h2>
+                <button class="close-btn" onclick="closeWithdrawModal()">&times;</button>
+            </div>
+            <form id="withdrawForm" class="modal-form">
+                <div class="form-group">
+                    <label for="withdrawPartNumber">Part Number</label>
+                    <input type="text" id="withdrawPartNumber" placeholder="Enter part number" required>
+                </div>
+                <div class="form-group">
+                    <label for="withdrawQuantity">Quantity</label>
+                    <input type="number" id="withdrawQuantity" min="1" placeholder="Enter quantity" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeWithdrawModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="withdrawSubmitBtn">
+                        <i class="fas fa-minus"></i>
+                        <span>Withdraw Stock</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scrap Modal -->
+    <div id="scrapModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Scrap Stock</h2>
+                <button class="close-btn" onclick="closeScrapModal()">&times;</button>
+            </div>
+            <form id="scrapForm" class="modal-form">
+                <div class="form-group">
+                    <label for="scrapPartNumber">Part Number</label>
+                    <input type="text" id="scrapPartNumber" placeholder="Enter part number" required>
+                </div>
+                <div class="form-group">
+                    <label for="scrapQuantity">Quantity</label>
+                    <input type="number" id="scrapQuantity" min="1" placeholder="Enter quantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="scrapReason">Reason</label>
+                    <textarea id="scrapReason" 
+                        class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:ring focus:ring-red-200 transition-all resize-none"
+                        rows="3"
+                        placeholder="Enter reason for scrapping"
+                        required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeScrapModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="scrapSubmitBtn">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Scrap Stock</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+    <div class="modal-content w-full max-w-lg">
+        <div class="modal-header flex items-center justify-between border-b pb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Edit Stock Details</h2>
+            <button class="close-btn" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Enhanced Tab Navigation -->
+        <div class="tab-container mt-6">
+            <div class="tabs flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+                <button class="tab-btn flex-1 py-2 px-4 rounded-md" data-tab="stockIn">
+                    <i class="fas fa-plus-circle mr-2 text-emerald-600"></i>
+                    Stock In
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-md" data-tab="stockOut">
+                    <i class="fas fa-minus-circle mr-2 text-amber-600"></i>
+                    Stock Out
+                </button>
+                <button class="tab-btn flex-1 py-2 px-4 rounded-md" data-tab="scrap">
+                    <i class="fas fa-trash-alt mr-2 text-red-600"></i>
+                    Scrap
+                </button>
+            </div>
+
+            <!-- Stock In Tab -->
+            <div class="tab-content" id="stockInTab">
+                <form id="editStockInForm" class="space-y-4">
+                    <input type="hidden" id="editStockInItemId">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <div class="relative">
+                            <input type="number" 
+                                   id="editStockInQuantity" 
+                                   class="form-input w-full py-2 px-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                                   min="0" 
+                                   required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-box text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Stock Out Tab -->
+            <div class="tab-content hidden" id="stockOutTab">
+                <form id="editStockOutForm" class="space-y-4">
+                    <input type="hidden" id="editStockOutItemId">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <div class="relative">
+                            <input type="number" 
+                                   id="editStockOutQuantity" 
+                                   class="form-input w-full py-2 px-3 border rounded-lg focus:ring-2 focus:ring-amber-500"
+                                   min="0" 
+                                   required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-box text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary bg-amber-600 hover:bg-amber-700">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Scrap Tab -->
+            <div class="tab-content hidden" id="scrapTab">
+                <form id="editScrapForm" class="space-y-4">
+                    <input type="hidden" id="editScrapItemId">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <div class="relative">
+                            <input type="number" 
+                                   id="editScrapQuantity" 
+                                   class="form-input w-full py-2 px-3 border rounded-lg focus:ring-2 focus:ring-red-500"
+                                   min="0" 
+                                   required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-box text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Scrapping</label>
+                        <textarea id="editScrapReason" 
+                                class="form-textarea w-full py-2 px-3 border rounded-lg focus:ring-2 focus:ring-red-500"
+                                rows="3" 
+                                required></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary bg-red-600 hover:bg-red-700">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Add these modals for quick edit popups -->
+    <div id="stockInEditPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-4 rounded-lg shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Update Stock In</h3>
+            <form id="quickStockInEdit" class="space-y-4">
+                <input type="hidden" id="quickEditPartNo">
+                <div class="form-group">
+                    <label>New Quantity</label>
+                    <input type="number" id="quickEditStockIn" class="w-full" min="0" required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeQuickEdit('stockInEditPopup')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="stockOutEditPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-4 rounded-lg shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Update Stock Out</h3>
+            <form id="quickStockOutEdit" class="space-y-4">
+                <input type="hidden" id="quickEditPartNo">
+                <div class="form-group">
+                    <label>New Quantity</label>
+                    <input type="number" id="quickEditStockOut" class="w-full" min="0" required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeQuickEdit('stockOutEditPopup')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="scrapEditPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-4 rounded-lg shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Update Scrap</h3>
+            <form id="quickScrapEdit" class="space-y-4">
+                <input type="hidden" id="quickEditPartNo">
+                <div class="form-group">
+                    <label>New Quantity</label>
+                    <input type="number" id="quickEditScrap" class="w-full" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="quickEditScrapReason" class="w-full" rows="3" required></textarea>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeQuickEdit('scrapEditPopup')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <main class="content">
+        <!-- Your stocks page content will go here -->
+    </main>
+
+    <!-- Add this just before the closing </body> tag -->
+    <script src="js/stock_inward.js"></script>
+    <script src="js/stock_actions.js"></script>
+    <script src="js/notifications.js"></script>
+    <script>
+        // Initialize stocks data from localStorage
+        let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
+        
+        // Function to save stocks to localStorage
+        function saveStocks() {
+            localStorage.setItem('stocks', JSON.stringify(stocks));
+        }
+
+        // Replace the existing updateTable function
+        function updateTable() {
+            const tableBody = document.getElementById('stockTableBody');
+            tableBody.innerHTML = '';
+            
+            stocks.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.partNumber}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${item.quantity}</td>
+                    
+                    <!-- Stock In Column -->
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="text-emerald-600">${item.stockIn || 0}</span>
+                            <button onclick="editStockType(${index}, 'stockIn')" 
+                                    class="text-emerald-600 hover:text-emerald-800 edit-button">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                    
+                    <!-- Stock Out Column -->
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="text-amber-600">${item.stockOut || 0}</span>
+                            <button onclick="editStockType(${index}, 'stockOut')" 
+                                    class="text-amber-600 hover:text-amber-800 edit-button">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                    
+                    <!-- Scrap Column -->
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="text-red-600">${item.scrap || 0}</span>
+                            <button onclick="editStockType(${index}, 'scrap')" 
+                                    class="text-red-600 hover:text-red-800 edit-button">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                        <button onclick="deleteItem(${index})" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Add this new function to handle editing different stock types
+        function editStockType(index, type) {
+            const item = stocks[index];
+            const modal = document.getElementById('editModal');
+            
+            // Set the active tab based on type
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === type) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show correct tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${type}Tab`).classList.remove('hidden');
+            
+            // Set values based on type
+            switch(type) {
+                case 'stockIn':
+                    document.getElementById('editStockInItemId').value = index;
+                    document.getElementById('editStockInQuantity').value = item.stockIn || 0;
+                    break;
+                case 'stockOut':
+                    document.getElementById('editStockOutItemId').value = index;
+                    document.getElementById('editStockOutQuantity').value = item.stockOut || 0;
+                    break;
+                case 'scrap':
+                    document.getElementById('editScrapItemId').value = index;
+                    document.getElementById('editScrapQuantity').value = item.scrap || 0;
+                    document.getElementById('editScrapReason').value = item.scrapReason || '';
+                    break;
+            }
+            
+            // Show modal
+            modal.classList.add('show');
+        }
+
+        // Add event listeners for the edit forms
+        document.addEventListener('DOMContentLoaded', function() {
+            // Stock In edit form
+            document.getElementById('editStockInForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const index = document.getElementById('editStockInItemId').value;
+                const newQuantity = parseInt(document.getElementById('editStockInQuantity').value);
+                
+                stocks[index].stockIn = newQuantity;
+                stocks[index].quantity = calculateTotalQuantity(stocks[index]);
+                
+                saveStocks();
+                updateTable();
+                closeEditModal();
+            });
+            
+            // Stock Out edit form
+            document.getElementById('editStockOutForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const index = document.getElementById('editStockOutItemId').value;
+                const newQuantity = parseInt(document.getElementById('editStockOutQuantity').value);
+                
+                stocks[index].stockOut = newQuantity;
+                stocks[index].quantity = calculateTotalQuantity(stocks[index]);
+                
+                saveStocks();
+                updateTable();
+                closeEditModal();
+            });
+            
+            // Scrap edit form
+            document.getElementById('editScrapForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const index = document.getElementById('editScrapItemId').value;
+                const newQuantity = parseInt(document.getElementById('editScrapQuantity').value);
+                const reason = document.getElementById('editScrapReason').value;
+                
+                stocks[index].scrap = newQuantity;
+                stocks[index].scrapReason = reason;
+                stocks[index].quantity = calculateTotalQuantity(stocks[index]);
+                
+                saveStocks();
+                updateTable();
+                closeEditModal();
+            });
+        });
+
+        // Helper function to calculate total quantity
+        function calculateTotalQuantity(item) {
+            return (item.stockIn || 0) - (item.stockOut || 0) - (item.scrap || 0);
+        }
+
+        // Load table data when page loads
+        document.addEventListener('DOMContentLoaded', updateTable);
+
+        // Modify your existing form submission handlers to include data persistence
+        document.getElementById('inwardForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partNumber = document.getElementById('partNumber').value;
+            const description = document.getElementById('materialDesc').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            const existingItem = stocks.find(item => item.partNumber === partNumber);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+                existingItem.stockIn = (existingItem.stockIn || 0) + quantity;
+                
+                // Trigger notification for stock update
+                notificationSystem.handleStockUpdate({
+                    item: existingItem,
+                    type: 'in',
+                    quantity: quantity
+                });
+            } else {
+                const newItem = {
+                    partNumber,
+                    description,
+                    quantity,
+                    stockIn: quantity,
+                    stockOut: 0,
+                    scrap: 0
+                };
+                stocks.push(newItem);
+                
+                // Trigger notification for new item
+                notificationSystem.handleStockUpdate({
+                    item: newItem,
+                    type: 'in',
+                    quantity: quantity
+                });
+            }
+
+            saveStocks();
+            updateTable();
+            closeModal();
+            this.reset();
+        });
+
+        document.getElementById('withdrawForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partNumber = document.getElementById('withdrawPartNumber').value;
+            const quantity = parseInt(document.getElementById('withdrawQuantity').value);
+
+            const item = stocks.find(item => item.partNumber === partNumber);
+            if (item && item.quantity >= quantity) {
+                item.quantity -= quantity;
+                item.stockOut = (item.stockOut || 0) + quantity;
+                
+                // Trigger notification for stock withdrawal
+                notificationSystem.handleStockUpdate({
+                    item: item,
+                    type: 'out',
+                    quantity: quantity
+                });
+
+                saveStocks();
+                updateTable();
+                closeWithdrawModal();
+                this.reset();
+            } else {
+                alert('Invalid part number or insufficient quantity!');
+            }
+        });
+
+        document.getElementById('scrapForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partNumber = document.getElementById('scrapPartNumber').value;
+            const quantity = parseInt(document.getElementById('scrapQuantity').value);
+
+            const item = stocks.find(item => item.partNumber === partNumber);
+            if (item && item.quantity >= quantity) {
+                item.quantity -= quantity;
+                item.scrap = (item.scrap || 0) + quantity;
+                
+                // Trigger notification for scrap
+                notificationSystem.handleStockUpdate({
+                    item: item,
+                    type: 'scrap',
+                    quantity: quantity
+                });
+
+                saveStocks();
+                updateTable();
+                closeScrapModal();
+                this.reset();
+            } else {
+                alert('Invalid part number or insufficient quantity!');
+            }
+        });
+
+        // Add these functions to your existing stock management code in stocks.html
+
+        function triggerStockNotification(item, type, quantity) {
+            const event = new CustomEvent('stockUpdated', {
+                detail: {
+                    item: {
+                        partNumber: item.partNumber,
+                        description: item.description,
+                        quantity: item.quantity
+                    },
+                    type: type,
+                    quantity: quantity
+                }
+            });
+            console.log('Triggering stock notification:', event.detail); // Debug log
+            document.dispatchEvent(event);
+        }
+
+        // Update your existing stock forms to include notification triggers
+
+        // Stock In Form
+        document.getElementById('inwardForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partNumber = document.getElementById('partNumber').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const description = document.getElementById('materialDesc').value;
+
+            const item = stocks.find(item => item.partNumber === partNumber) || {
+                partNumber,
+                description,
+                quantity: 0
+            };
+
+            item.quantity = (parseInt(item.quantity) || 0) + quantity;
+            
+            // Update stocks array and save
+            if (!stocks.find(s => s.partNumber === partNumber)) {
+                stocks.push(item);
+            }
+            saveStocks();
+            
+            // Trigger notification
+            triggerStockNotification(item, 'in', quantity);
+            
+            updateTable();
+            this.reset();
+        });
+
+        // Stock Out Form
+        document.getElementById('withdrawForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partNumber = document.getElementById('withdrawPartNumber').value;
+            const quantity = parseInt(document.getElementById('withdrawQuantity').value);
+
+            const item = stocks.find(item => item.partNumber === partNumber);
+            if (item && item.quantity >= quantity) {
+                item.quantity -= quantity;
+                
+                // Trigger notification
+                triggerStockNotification(item, 'out', quantity);
+                
+                saveStocks();
+                updateTable();
+                this.reset();
+            }
+        });
+
+        // Scrap Form
+        document.getElementById('scrapForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partNumber = document.getElementById('scrapPartNumber').value;
+            const quantity = parseInt(document.getElementById('scrapQuantity').value);
+
+            const item = stocks.find(item => item.partNumber === partNumber);
+            if (item && item.quantity >= quantity) {
+                item.quantity -= quantity;
+                
+                // Trigger notification
+                triggerStockNotification(item, 'scrap', quantity);
+                
+                saveStocks();
+                updateTable();
+                this.reset();
+            }
+        });
+       
+    </script>
+</body>
+</html>
